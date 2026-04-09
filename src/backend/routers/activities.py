@@ -28,7 +28,7 @@ def get_activities(
     - start_time: Filter activities starting at or after this time (24-hour format, e.g., '14:30')
     - end_time: Filter activities ending at or before this time (24-hour format, e.g., '17:00')
     - difficulty: Filter activities by difficulty level ('Beginner', 'Intermediate', 'Advanced'),
-                  or use 'all' to return only activities with no difficulty specified
+                  or use 'all' to return only activities that have no difficulty set (open to all levels)
     """
     # Build the query based on provided filters
     query = {}
