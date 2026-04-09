@@ -51,6 +51,11 @@ document.addEventListener("DOMContentLoaded", () => {
     weekend: { days: ["Saturday", "Sunday"] }, // Weekend days
   };
 
+  // Message template used when sharing an activity.
+  // Update this text to change what gets shared with friends.
+  const SHARE_MESSAGE_TEMPLATE = (name, description, schedule) =>
+    `Check out ${name} at Mergington High School!\n${description}\nSchedule: ${schedule}`;
+
   // Initialize filters from active elements
   function initializeFilters() {
     // Initialize day filter
@@ -568,6 +573,9 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         `
         }
+        <button class="share-button" data-activity="${name}" aria-label="Share this activity">
+          📤 Share
+        </button>
       </div>
     `;
 
@@ -587,7 +595,44 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    // Add click handler for share button
+    const shareButton = activityCard.querySelector(".share-button");
+    shareButton.addEventListener("click", () => {
+      shareActivity(name, details);
+    });
+
     activitiesList.appendChild(activityCard);
+  }
+
+  // Share an activity using the Web Share API or clipboard fallback
+  async function shareActivity(name, details) {
+    const formattedSchedule = formatSchedule(details);
+    const shareText = SHARE_MESSAGE_TEMPLATE(name, details.description, formattedSchedule);
+    const shareData = {
+      title: `${name} - Mergington High School`,
+      text: shareText,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.error("Error sharing:", error);
+        }
+      }
+    } else {
+      // Fallback: copy share text to clipboard
+      const clipboardText = `${shareData.title}\n${shareText}\n${shareData.url}`;
+      try {
+        await navigator.clipboard.writeText(clipboardText);
+        showMessage(`Activity details copied! You can now paste them wherever you'd like.`, "success");
+      } catch (error) {
+        console.error("Error copying to clipboard:", error);
+        showMessage("Could not copy to clipboard. Please try again.", "error");
+      }
+    }
   }
 
   // Event listeners for search and filter
